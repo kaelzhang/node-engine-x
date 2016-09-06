@@ -1,0 +1,27 @@
+{
+  "name": "engine-x",
+  "version": "1.0.0",
+  "description": "engine-x",
+  "main": "./src",
+  "scripts": {
+    "test": "ava --verbose --timeout=10s"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kaelzhang/node-engine-x.git"
+  },
+  "keywords": [
+    "engine-x"
+  ],
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "author": "kaelzhang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kaelzhang/node-engine-x/issues"
+  },
+  "devDependencies": {
+    "ava": "^0.16.0"
+  }
+}
