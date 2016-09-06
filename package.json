@@ -1,7 +1,7 @@
 {
   "name": "engine-x",
   "version": "1.0.0",
-  "description": "engine-x",
+  "description": "engine-x, nginx the node version.",
   "main": "./src",
   "scripts": {
     "test": "ava --verbose --timeout=10s"
@@ -11,7 +11,11 @@
     "url": "git://github.com/kaelzhang/node-engine-x.git"
   },
   "keywords": [
-    "engine-x"
+    "engine-x",
+    "nginx",
+    "proxy",
+    "reverse-proxy",
+    "location"
   ],
   "engines": {
     "node": ">=0.10.0"
