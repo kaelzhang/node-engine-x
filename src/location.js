@@ -11,13 +11,13 @@ const MODIFIER_PREFIX_LONGEST = '^~'
 class Location {
   constructor ({
     location,
-    modifier = MODIFIER_DEFAULT
+    modifier = MODIFIER_PREFIX
   }) {
     this._modifier = modifier
     this._location = location
 
-    this._length = modifier === MODIFIER_DEFAULT
-      || modifier === MODIFIER_MATCH_LONGEST
+    this._length = modifier === MODIFIER_PREFIX
+      || modifier === MODIFIER_PREFIX_LONGEST
       ? this._location.length
       : 0
   }
@@ -44,9 +44,9 @@ class Location {
 Location.MODIFIERS = {
   MODIFIER_CASE_INSENSATIVE,
   MODIFIER_CASE_SENSATIVE,
-  MODIFIER_DEFAULT,
+  MODIFIER_PREFIX,
   MODIFIER_EQUAL,
-  MODIFIER_MATCH_LONGEST
+  MODIFIER_PREFIX_LONGEST
 }
 
 
@@ -63,8 +63,8 @@ const MATCHER_MAP = {
     return matcher === pathname
   },
 
-  [MODIFIER_DEFAULT]: prefix_match,
-  [MODIFIER_MATCH_LONGEST]: prefix_match,
+  [MODIFIER_PREFIX]: prefix_match,
+  [MODIFIER_PREFIX_LONGEST]: prefix_match,
   [MODIFIER_CASE_INSENSATIVE]: regex_match,
   [MODIFIER_CASE_SENSATIVE]: regex_match
 }
@@ -104,3 +104,5 @@ Location.from = ({location, location_is, modifier}) => {
 
   throw new TypeError('invalid location "${location}"')
 }
+
+module.exports = Location

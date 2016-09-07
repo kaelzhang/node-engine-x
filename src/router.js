@@ -2,6 +2,8 @@
 
 const fs = require('fs')
 const node_path = require('path')
+const make_array = require('make-array')
+const async = require('async')
 
 const Location = require('./location')
 
@@ -20,7 +22,6 @@ module.exports = class Router {
     proxy_pass,
     routes: routes = []
   }) {
-    super()
 
     this._routes = []
     this._default_router = this._clean_route({
@@ -46,7 +47,7 @@ module.exports = class Router {
     const {
       rewrite,
       rewrite_last,
-      root: route = [],
+      root: root = [],
       proxy_pass,
     } = route
 
@@ -164,7 +165,12 @@ module.exports = class Router {
     // if true, then it will skip rewrite
     no_rewrite
   }, callback) {
-    const router = this._matched_router(request)
+
+    const router = this._matched_router({
+      pathname,
+      method
+    })
+
     const {
       rewrite,
       rewrite_last

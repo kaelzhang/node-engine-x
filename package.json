@@ -32,6 +32,7 @@
     "ava": "^0.16.0"
   },
   "dependencies": {
+    "async": "^2.0.1",
     "make-array": "^1.0.1",
     "proxy-pass": "0.0.0"
   }
