@@ -3,7 +3,7 @@
 const fs = require('fs')
 const node_path = require('path')
 
-const Location = require('./lib/location')
+const Location = require('./location')
 
 const {
   MODIFIER_CASE_INSENSATIVE,
@@ -13,7 +13,7 @@ const {
   MODIFIER_MATCH_LONGEST
 } = Location.MODIFIERS
 
-class Router {
+module.exports = class Router {
   constructor ({
     rewrite,
     root,

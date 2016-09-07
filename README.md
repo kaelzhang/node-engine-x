@@ -14,7 +14,12 @@
 
 # engine-x
 
-<!-- description -->
+EnGINe-X, nginx the node version, the reverse proxy for node.
+
+`engine-x` is the subset of nginx, and only cares about the things inside the `server` directive of nginx, and does not care about:
+
+- `listen`
+- `server_name`
 
 ## Install
 
@@ -25,7 +30,7 @@ $ npm install engine-x --save
 ## Usage
 
 ```js
-let engine_x = require('engine-x')
+const nginx = require('engine-x')
 ```
 
 ## License

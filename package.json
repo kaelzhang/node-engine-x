@@ -15,10 +15,13 @@
     "nginx",
     "proxy",
     "reverse-proxy",
-    "location"
+    "location",
+    "router",
+    "proxy-pass",
+    "rewrite"
   ],
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=6"
   },
   "author": "kaelzhang",
   "license": "MIT",
@@ -27,5 +30,9 @@
   },
   "devDependencies": {
     "ava": "^0.16.0"
+  },
+  "dependencies": {
+    "make-array": "^1.0.1",
+    "proxy-pass": "0.0.0"
   }
 }
