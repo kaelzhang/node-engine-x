@@ -37,13 +37,13 @@ module.exports = class Router {
 
   add (route) {
     const location = Location.from(route)
-    const cleaned = this._clean_route(route)
+    const cleaned = this._clean_route(route, true)
     cleaned.location = location
 
     return this._add(cleaned)
   }
 
-  _clean_route (route) {
+  _clean_route (route, strict) {
     const {
       rewrite,
       rewrite_last,
@@ -71,7 +71,9 @@ module.exports = class Router {
       }
     }
 
-    throw new Error(`invalid route: ${JSON.stringify(route)}`)
+    if (strict) {
+      throw new Error(`invalid route: ${JSON.stringify(route)}`)
+    }
   }
 
   _add (route) {
@@ -166,14 +168,22 @@ module.exports = class Router {
     no_rewrite
   }, callback) {
 
+    // `pathname` always starts with '/'
+    pathname = pathname || '/'
+
     const router = this._matched_router({
       pathname,
       method
     })
 
+    if (!router) {
+      callback(null, null)
+      return
+    }
+
     const {
       rewrite,
-      rewrite_last
+      last
     } = router
 
     if (rewrite && no_rewrite) {
@@ -186,7 +196,7 @@ module.exports = class Router {
       return this._route({
         pathname,
         method,
-        rewrite_last
+        no_rewrite: last
       }, callback)
     }
 
@@ -210,20 +220,20 @@ module.exports = class Router {
   }
 
   _try_files (pathname, root, callback) {
-    const found = null
-    const tasks = root.map((root) => {
-      return (done) => {
-        const path = node_path.join(root, pathname)
-        fs.exists(path, (exists) => {
-          if (exists) {
-            found = path
-            done(null, true)
-          }
-        })
-      }
-    })
+    let found = null
 
-    async.some(tasks, () => {
+    async.someSeries(root, (root, done) => {
+      const path = node_path.join(root, pathname)
+      fs.exists(path, (exists) => {
+        if (exists) {
+          found = path
+          return done(null, true)
+        }
+
+        done(null, false)
+      })
+
+    }, () => {
       callback(found)
     })
   }
