@@ -193,7 +193,7 @@ module.exports = class Router {
 
     if (rewrite && !no_rewrite) {
       pathname = rewrite(pathname)
-      return this._route({
+      return this.route({
         pathname,
         method,
         no_rewrite: last
