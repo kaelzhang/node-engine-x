@@ -2,10 +2,10 @@
 
 const fs = require('fs')
 const node_path = require('path')
-const make_array = require('make-array')
 const async = require('async')
 
 const Location = require('./location')
+const clean = require('./clean-router')
 
 const {
   MODIFIER_CASE_INSENSATIVE,
@@ -24,7 +24,7 @@ module.exports = class Router {
   }) {
 
     this._routes = []
-    this._default_router = this._clean_route({
+    this._default_router = clean({
       rewrite,
       root,
       proxy_pass
@@ -37,60 +37,10 @@ module.exports = class Router {
 
   add (route) {
     const location = Location.from(route)
-    const cleaned = this._clean_route(route, true)
+    const cleaned = clean(route, true)
     cleaned.location = location
 
     return this._add(cleaned)
-  }
-
-  _clean_route (route, strict) {
-    const {
-      rewrite,
-      root: root = [],
-      proxy_pass,
-    } = route
-
-    if (rewrite) {
-      if (typeof rewrite === 'function') {
-        rewrite = {
-          replace: rewrite,
-          last: true
-        }
-      }
-
-      const {
-        replace,
-        last = true
-      } = rewrite
-
-      if (typeof replace !== 'function') {
-        throw new TypeError(`invalid rewrite directive.`)
-      }
-
-      return {
-        rewrite: {
-          replace,
-          last
-        }
-      }
-    }
-
-    if (root) {
-      return {
-        root: make_array(root),
-        proxy_pass
-      }
-    }
-
-    if (proxy_pass) {
-      return {
-        proxy_pass
-      }
-    }
-
-    if (strict) {
-      throw new TypeError(`invalid route: ${JSON.stringify(route)}`)
-    }
   }
 
   _add (route) {

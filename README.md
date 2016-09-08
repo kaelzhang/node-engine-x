@@ -34,24 +34,29 @@ const {
   Router
 } = require('engine-x')
 
-new Router({
+const router = new Router({
   routes: [
     {
+      // same as `location /app {...}` directive of nginx.
       location: '/app',
       root: '/path/to'
     },
 
     {
+      // same as `location = /app/legacy {...}` directive of nginx
+      location_is: '/app/legacy',
+      root: '/legacy/path/to'
+    },
+
+    {
+      // same as `location ~* -[a-z0-9]{7}\.png$/` directive of nginx
       location: /-[a-z0-9]{7}\.png$/i,
 
       // rewrite '/path/to/a-28dfeg0.png' -> '/path/to/a.png'
-      rewrite: {
-        replace: url => {
-          return url.replace(/-[a-z0-79]{32}\.([a-z0-9]+)$/i, (m, p1) => {
-            return `.${p1}`
-          })
-        },
-        last: true
+      rewrite: url => {
+        return url.replace(/-[a-z0-79]{32}\.([a-z0-9]+)$/i, (m, p1) => {
+          return `.${p1}`
+        })
       }
     }
   ],
@@ -63,7 +68,9 @@ new Router({
   // then will proxy pass to the server
   proxy_pass:
 
-}).route({
+})
+
+router.route({
   pathname: '/app/a-28dfeg0.png'
 
 }, (filename, url) => {
