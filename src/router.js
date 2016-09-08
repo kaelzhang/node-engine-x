@@ -46,15 +46,32 @@ module.exports = class Router {
   _clean_route (route, strict) {
     const {
       rewrite,
-      rewrite_last,
       root: root = [],
       proxy_pass,
     } = route
 
     if (rewrite) {
+      if (typeof rewrite === 'function') {
+        rewrite = {
+          replace: rewrite,
+          last: true
+        }
+      }
+
+      const {
+        replace,
+        last = true
+      } = rewrite
+
+      if (typeof replace !== 'function') {
+        throw new TypeError(`invalid rewrite directive.`)
+      }
+
       return {
-        rewrite,
-        rewrite_last
+        rewrite: {
+          replace,
+          last
+        }
       }
     }
 
@@ -72,7 +89,7 @@ module.exports = class Router {
     }
 
     if (strict) {
-      throw new Error(`invalid route: ${JSON.stringify(route)}`)
+      throw new TypeError(`invalid route: ${JSON.stringify(route)}`)
     }
   }
 
@@ -193,8 +210,7 @@ module.exports = class Router {
     }
 
     const {
-      rewrite,
-      last
+      rewrite
     } = router
 
     if (rewrite && no_rewrite) {
@@ -203,11 +219,11 @@ module.exports = class Router {
     }
 
     if (rewrite && !no_rewrite) {
-      pathname = rewrite(pathname)
+      pathname = rewrite.replace(pathname)
       return this._route({
         pathname,
         method,
-        no_rewrite: last
+        no_rewrite: rewrite.last
       }, callback)
     }
 

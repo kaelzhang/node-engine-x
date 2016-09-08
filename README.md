@@ -27,12 +27,14 @@ EnGINe-X, nginx the node version, the reverse proxy for node.
 $ npm install engine-x --save
 ```
 
-## Usage
+## `nginx.Router`
 
 ```js
-const Nginx = require('engine-x')
+const {
+  Router
+} = require('engine-x')
 
-new Nginx({
+new Router({
   routes: [
     {
       location: '/app',
@@ -43,12 +45,14 @@ new Nginx({
       location: /-[a-z0-9]{7}\.png$/i,
 
       // rewrite '/path/to/a-28dfeg0.png' -> '/path/to/a.png'
-      rewrite: url => {
-        return url.replace(/-[a-z0-79]{32}\.([a-z0-9]+)$/i, (m, p1) => {
-          return `.${p1}`
-        })
-      },
-      last: true
+      rewrite: {
+        replace: url => {
+          return url.replace(/-[a-z0-79]{32}\.([a-z0-9]+)$/i, (m, p1) => {
+            return `.${p1}`
+          })
+        },
+        last: true
+      }
     }
   ],
 
@@ -56,7 +60,8 @@ new Nginx({
   root: '/path/to/default/root'
 
   // if no root specified, or no matched file found within root,
-  // then will proxy
+  // then will proxy pass to the server
+  proxy_pass:
 
 }).route({
   pathname: '/app/a-28dfeg0.png'
