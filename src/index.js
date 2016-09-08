@@ -1,3 +1,3 @@
 'use strict'
 
-module.exports = require('./router')
+exports.Router = require('./router')

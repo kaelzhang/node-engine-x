@@ -20,7 +20,7 @@ module.exports = class Router {
     rewrite,
     root,
     proxy_pass,
-    routes: routes = []
+    routes = []
   }) {
 
     this._routes = []
@@ -162,10 +162,21 @@ module.exports = class Router {
 
   route ({
     pathname,
+    method
+  }, callback) {
+
+    this._route({
+      pathname,
+      method
+    }, callback)
+  }
+
+  _route ({
+    pathname,
     method,
 
     // if true, then it will skip rewrite
-    no_rewrite
+    no_rewrite = false
   }, callback) {
 
     // `pathname` always starts with '/'
@@ -193,7 +204,7 @@ module.exports = class Router {
 
     if (rewrite && !no_rewrite) {
       pathname = rewrite(pathname)
-      return this.route({
+      return this._route({
         pathname,
         method,
         no_rewrite: last

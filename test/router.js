@@ -1,5 +1,7 @@
 const test = require('ava')
-const Nginx = require('..')
+const {
+  Router
+} = require('..')
 
 const node_path = require('path')
 
@@ -60,7 +62,7 @@ const cases = [
 
 cases.forEach((c) => {
   test.cb(c.d, t => {
-    new Nginx(c.c).route({
+    new Router(c.c).route({
       pathname: c.p
     }, (filename, url) => {
       const [ef, eu] = c.e
