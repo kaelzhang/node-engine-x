@@ -10,19 +10,17 @@ module.exports = (route, strict) => {
   } = route
 
   if (rewrite) {
-    if (typeof rewrite === 'function') {
-      rewrite = {
-        replace: rewrite,
-
-        // `last` default to true
-        last: true
-      }
-    }
-
     const {
       replace,
       last = true
-    } = rewrite
+    } = typeof rewrite === 'function'
+      ? {
+          replace: rewrite,
+
+          // `last` default to true
+          last: true
+        }
+      : rewrite
 
     if (typeof replace !== 'function') {
       throw new TypeError(`invalid rewrite directive.`)
