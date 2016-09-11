@@ -222,16 +222,20 @@ class Router {
 
     let redirect_url
     let permanent = false
+    let redirect_called = false
 
     function redirect (url, perm) {
+      redirect_called = true
       redirect_url = url
       permanent = perm
     }
 
     const result = rewrite(pathname, redirect)
 
-    if (redirect_url) {
+    if (redirect_called) {
       emitter.emitOnce('redirect', redirect_url, permanent)
+      redirect_url = null
+      permanent = null
       return
     }
 

@@ -20,7 +20,7 @@ module.exports = (route, strict) => {
     }
   }
 
-  if (root || proxy_pass) {
+  if (root || proxy_pass || returns) {
     return {
       root: make_array(root),
       proxy_pass,

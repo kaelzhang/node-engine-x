@@ -57,7 +57,7 @@ const cases = [
     'proxy-pass': url('/c.js')
   },
   {
-    d: 'rewrite, default',
+    d: 'rewrite, will route again after rewroten',
     c: {
       routes: [
         {
@@ -88,6 +88,45 @@ const cases = [
     p: '/path/a.png',
     error: 'too many rewrites.'
     // found: fixture('rewrite', 'path', 'a.png')
+  },
+  {
+    d: 'rewrite, redirect',
+    c: {
+      routes: [
+        {
+          location: '/',
+          rewrite: (url, redirect) => {
+            redirect('http://google.com', true)
+          }
+        }
+      ]
+    },
+    p: '/redirect',
+    redirect: ['http://google.com', true]
+  },
+  {
+    d: 'rewrite, return status',
+    c: {
+      routes: [{
+        location: '/',
+        rewrite: () => {
+          return 404
+        }
+      }]
+    },
+    p: '/any/pathname',
+    'return': 404
+  },
+  {
+    d: 'returns',
+    c: {
+      routes: [{
+        location: '/',
+        returns: 404
+      }]
+    },
+    p: '/any/pathname',
+    'return': 404
   }
 ]
 
@@ -96,7 +135,9 @@ const EVENTS = [
   'found',
   'not-found',
   'error',
-  'proxy-pass'
+  'proxy-pass',
+  'redirect',
+  'return'
 ]
 
 cases.forEach((c) => {
@@ -109,9 +150,18 @@ cases.forEach((c) => {
 
     EVENTS.some((type) => {
       if (type in c) {
+        let called
+
         router.route({
           pathname: c.p
         }).on(type, (...args) => {
+          if (called) {
+            t.fail('called more than once')
+            t.end()
+            return
+          }
+          called = true
+
           if (type === 'error') {
             t.is(args[0].message, c.error)
             t.end()
