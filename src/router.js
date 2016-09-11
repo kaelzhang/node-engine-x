@@ -2,10 +2,13 @@
 
 const fs = require('fs')
 const node_path = require('path')
+
 const async = require('async')
 
 const Location = require('./location')
 const clean = require('./clean-router')
+const Emitter = require('./emitter')
+
 
 const {
   MODIFIER_CASE_INSENSATIVE,
@@ -15,7 +18,7 @@ const {
   MODIFIER_MATCH_LONGEST
 } = Location.MODIFIERS
 
-module.exports = class Router {
+class Router {
   constructor ({
     rewrite,
     root,
@@ -132,19 +135,21 @@ module.exports = class Router {
     method
   }, callback) {
 
+    const emitter = new Emitter()
+
     this._route({
       pathname,
       method
-    }, callback)
+    }, emitter)
+
+    return emitter
   }
 
   _route ({
     pathname,
     method,
-
-    // if true, then it will skip rewrite
-    no_rewrite = false
-  }, callback) {
+    rewrite_count = 0
+  }, emitter) {
 
     // `pathname` always starts with '/'
     pathname = pathname || '/'
@@ -155,7 +160,7 @@ module.exports = class Router {
     })
 
     if (!router) {
-      callback(null, null)
+      emitter.emitOnce('not-found')
       return
     }
 
@@ -163,37 +168,84 @@ module.exports = class Router {
       rewrite
     } = router
 
-    if (rewrite && no_rewrite) {
-      callback(null, null)
-      return
-    }
-
-    if (rewrite && !no_rewrite) {
-      pathname = rewrite.replace(pathname)
-      return this._route({
+    if (rewrite) {
+      return this._rewrite({
         pathname,
         method,
-        no_rewrite: rewrite.last
-      }, callback)
+        rewrite_count
+      }, emitter)
     }
 
     const {
       root,
-      proxy_pass
+      proxy_pass,
+      returns
     } = router
 
     this._try_files(pathname, root, (found) => {
       if (found) {
-        return callback(found, null)
+        emitter.emitOnce('found', found)
+        return
       }
 
-      if (!proxy_pass) {
-        return callback(null, null)
+      if (proxy_pass) {
+        const url = proxy_pass + pathname
+        emitter.emitOnce('proxy-pass', url)
+        return
       }
 
-      const url = proxy_pass + pathname
-      callback(null, url)
+      if (returns) {
+        emitter.emitOnce('return', returns)
+        return
+      }
+
+      emitter.emitOnce('not-found')
     })
+  }
+
+  _rewrite ({
+    pathname,
+    method,
+    rewrite_count
+  }, emitter) {
+
+    rewrite_count ++
+
+    if (rewrite_count > Router.REWRITE_LIMIT) {
+      emitter.emitOnce('error', new Error('too many rewrites.'))
+      return
+    }
+
+    let redirect_url
+    let permanent = false
+
+    function redirect (url, perm) {
+      redirect_url = url
+      permanent = perm
+    }
+
+    const result = rewrite(pathname, redirect)
+
+    if (redirect_url) {
+      emitter.emitOnce('redirect', redirect_url, permanent)
+      return
+    }
+
+    if (typeof result === 'number') {
+      emitter.emitOnce('return', result)
+      return
+    }
+
+    if (typeof result !== 'string') {
+      emitter.emitOnce('error', new Error('invalid rewrite return value.'))
+      return
+    }
+
+    this._route({
+      pathname: result,
+      method,
+      rewrite_count
+    }, emitter)
   }
 
   _try_files (pathname, root, callback) {
@@ -215,3 +267,8 @@ module.exports = class Router {
     })
   }
 }
+
+
+Router.REWRITE_LIMIT = 10
+
+module.exports = Router
