@@ -21,14 +21,7 @@ const MATCHER_MAP = {
 }
 
 
-module.exports = class Location {
-  static MODIFIERS = {
-    MODIFIER_CASE_INSENSATIVE,
-    MODIFIER_CASE_SENSATIVE,
-    MODIFIER_PREFIX,
-    MODIFIER_EQUAL,
-    MODIFIER_PREFIX_LONGEST
-  }
+class Location {
 
   // Sanitize location directive.
   // Dirty works
@@ -102,6 +95,15 @@ module.exports = class Location {
 }
 
 
+Location.MODIFIERS = {
+  MODIFIER_CASE_INSENSATIVE,
+  MODIFIER_CASE_SENSATIVE,
+  MODIFIER_PREFIX,
+  MODIFIER_EQUAL,
+  MODIFIER_PREFIX_LONGEST
+}
+
+
 function regex_match (matcher, pathname) {
   return matcher.test(pathname)
 }
@@ -109,3 +111,6 @@ function regex_match (matcher, pathname) {
 function prefix_match (matcher, pathname) {
   return pathname.indexOf(matcher) === 0
 }
+
+
+module.exports = Location

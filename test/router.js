@@ -1,17 +1,16 @@
 const test = require('ava')
+const make_array = require('make-array')
 const {
   Router
 } = require('..')
 
 const node_path = require('path')
-
-const PATH_SRC = node_path.join(__dirname, 'fixtures', 'src')
-const PATH_SRC2 = node_path.join(__dirname, 'fixtures', 'src2')
-
-const src = path => node_path.join(PATH_SRC, path)
-const src2 = path => node_path.join(PATH_SRC2, path)
-
+const PATH_FIXTURE = node_path.join(__dirname, 'fixtures')
 const PROXY_HOST = 'http://aaaa.com'
+
+const fixture = (...path) => node_path.join(PATH_FIXTURE, ...path)
+const url = path => PROXY_HOST + path
+
 
 const cases = [
   {
@@ -19,26 +18,26 @@ const cases = [
     c: {
     },
     p: '/a.js',
-    e: [null, null]
+    'not-found': []
   },
   {
     d: 'default router: root',
     c: {
-      root: PATH_SRC
+      root: fixture('src')
     },
     p: '/a.js',
-    e: [src('a.js'), null]
+    found: fixture('src', 'a.js')
   },
   {
     d: 'default router: root fallback',
     c: {
       root: [
-        PATH_SRC,
-        PATH_SRC2
+        fixture('src'),
+        fixture('src2')
       ]
     },
     p: '/b.js',
-    e: [src2('b.js'), null]
+    found: fixture('src2', 'b.js')
   },
   {
     d: 'default router: proxy_pass, without root',
@@ -46,7 +45,7 @@ const cases = [
       proxy_pass: PROXY_HOST
     },
     p: '/c.js',
-    e: [null, PROXY_HOST + '/c.js']
+    'proxy-pass': url('/c.js')
   },
   {
     d: 'default router: proxy_pass, with empty root',
@@ -55,20 +54,84 @@ const cases = [
       proxy_pass: PROXY_HOST
     },
     p: '/c.js',
-    e: [null, PROXY_HOST + '/c.js']
+    'proxy-pass': url('/c.js')
+  },
+  {
+    d: 'rewrite, default',
+    c: {
+      routes: [
+        {
+          location: '/',
+          root: fixture('rewrite')
+        },
+        {
+          location: /\.webp$/,
+          rewrite: (path) => {
+            return path.replace(/\.webp$/, '.png')
+          }
+        }
+      ]
+    },
+    p: '/path/a.webp',
+    found: fixture('rewrite', 'path', 'a.png')
+  },
+  {
+    d: 'rewrite, too many rewrites',
+    c: {
+      routes: [
+        {
+          location: '/',
+          rewrite: path => path
+        }
+      ]
+    },
+    p: '/path/a.png',
+    error: 'too many rewrites.'
+    // found: fixture('rewrite', 'path', 'a.png')
   }
 ]
 
 
+const EVENTS = [
+  'found',
+  'not-found',
+  'error',
+  'proxy-pass'
+]
+
 cases.forEach((c) => {
-  test.cb(c.d, t => {
-    new Router(c.c).route({
-      pathname: c.p
-    }, (filename, url) => {
-      const [ef, eu] = c.e
-      t.is(ef, filename)
-      t.is(eu, url)
-      t.end()
+  const _test = c.only
+    ? test.cb.only
+    : test.cb
+
+  _test(c.d, t => {
+    const router = new Router(c.c)
+
+    EVENTS.some((type) => {
+      if (type in c) {
+        router.route({
+          pathname: c.p
+        }).on(type, (...args) => {
+          if (type === 'error') {
+            t.is(args[0].message, c.error)
+            t.end()
+            return
+          }
+
+          t.deepEqual(args.sort(), make_array(c[type]).sort())
+          t.end()
+
+        }).on('error', (e) => {
+          if (!c.error) {
+            console.error(e.stack)
+            t.fail()
+            t.end()
+          }
+        })
+
+        return true
+      }
     })
+
   })
 })

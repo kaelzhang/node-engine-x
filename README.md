@@ -62,12 +62,12 @@ const router = new Router({
   ],
 
   // if no location matched, then use default root
-  root: '/path/to/default/root'
+  root: '/path/to/default/root',
 
-  // if no root specified, or no matched file found within root,
+  // if no location is matched,
+  // and if no root specified, or no matched file found within root,
   // then will proxy pass to the server
-  proxy_pass:
-
+  proxy_pass: 'http://domain.com'
 })
 
 router.route({

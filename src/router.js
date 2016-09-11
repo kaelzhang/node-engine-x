@@ -170,10 +170,12 @@ class Router {
 
     if (rewrite) {
       return this._rewrite({
+        rewrite,
         pathname,
         method,
-        rewrite_count
-      }, emitter)
+        rewrite_count,
+        emitter
+      })
     }
 
     const {
@@ -204,10 +206,12 @@ class Router {
   }
 
   _rewrite ({
+    rewrite,
     pathname,
     method,
-    rewrite_count
-  }, emitter) {
+    rewrite_count,
+    emitter
+  }) {
 
     rewrite_count ++
 

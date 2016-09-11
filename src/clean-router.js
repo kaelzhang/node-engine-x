@@ -5,45 +5,26 @@ const make_array = require('make-array')
 module.exports = (route, strict) => {
   const {
     rewrite,
-    root: root = [],
+    root,
     proxy_pass,
+    returns
   } = route
 
   if (rewrite) {
-    const {
-      replace,
-      last = true
-    } = typeof rewrite === 'function'
-      ? {
-          replace: rewrite,
-
-          // `last` default to true
-          last: true
-        }
-      : rewrite
-
-    if (typeof replace !== 'function') {
+    if (typeof rewrite !== 'function') {
       throw new TypeError(`invalid rewrite directive.`)
     }
 
     return {
-      rewrite: {
-        replace,
-        last
-      }
+      rewrite
     }
   }
 
-  if (root) {
+  if (root || proxy_pass) {
     return {
       root: make_array(root),
-      proxy_pass
-    }
-  }
-
-  if (proxy_pass) {
-    return {
-      proxy_pass
+      proxy_pass,
+      returns
     }
   }
 
