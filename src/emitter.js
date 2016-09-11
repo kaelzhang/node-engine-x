@@ -17,6 +17,8 @@ module.exports = class Emitter extends EventEmitter {
 
     setImmediate(() => {
       this.emit(type, ...args)
+      this.removeAllListeners()
+      this._emitted = null
     })
   }
 }

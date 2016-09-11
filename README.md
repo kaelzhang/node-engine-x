@@ -53,7 +53,7 @@ const router = new Router({
       location: /-[a-z0-9]{7}\.png$/i,
 
       // rewrite '/path/to/a-28dfeg0.png' -> '/path/to/a.png'
-      rewrite: url => {
+      rewrite: (url, redirect) => {
         return url.replace(/-[a-z0-79]{32}\.([a-z0-9]+)$/i, (m, p1) => {
           return `.${p1}`
         })
@@ -70,14 +70,27 @@ const router = new Router({
   proxy_pass: 'http://domain.com'
 })
 
-router.route({
+router
+.route({
   pathname: '/app/a-28dfeg0.png'
 
-}, (filename, url) => {
+})
+.on('found', (filename) => {
   filename // '/path/to/app/a.png'
-  url      // null, if filename is found, then url will be null
+})
+// will not be called
+.on('proxy-pass', (url) => {
 })
 ```
+
+### Events
+
+- `'not-found'`
+- `'found'`
+- `'error'`
+- `'redirect'`
+- `'return'`
+- `'proxy-pass'`
 
 ## License
 
