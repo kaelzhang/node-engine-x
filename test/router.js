@@ -127,7 +127,33 @@ const cases = [
     },
     p: '/any/pathname',
     'return': 404
-  }
+  },
+  {
+    d: 'function location: not-found',
+    c: {
+      routes: [{
+        location: (pathname) => {
+          return pathname === '/abc'
+        },
+        returns: 200
+      }]
+    },
+    p: '/abcd',
+    'not-found': []
+  },
+  {
+    d: 'function location: found -> returns',
+    c: {
+      routes: [{
+        location: (pathname) => {
+          return pathname === '/a.png'
+        },
+        returns: 200
+      }]
+    },
+    p: '/a.png',
+    'return': 200
+  },
 ]
 
 

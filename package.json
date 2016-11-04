@@ -1,6 +1,6 @@
 {
   "name": "engine-x",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "engine-x, nginx the node version.",
   "main": "./src",
   "scripts": {

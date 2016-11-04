@@ -7,6 +7,7 @@ const MODIFIER_CASE_SENSATIVE = '~'
 const MODIFIER_PREFIX = ''
 const MODIFIER_EQUAL = '='
 const MODIFIER_PREFIX_LONGEST = '^~'
+const MODIFIER_FUNCTION = 'func'
 
 
 const MATCHER_MAP = {
@@ -17,7 +18,10 @@ const MATCHER_MAP = {
   [MODIFIER_PREFIX]: prefix_match,
   [MODIFIER_PREFIX_LONGEST]: prefix_match,
   [MODIFIER_CASE_INSENSATIVE]: regex_match,
-  [MODIFIER_CASE_SENSATIVE]: regex_match
+  [MODIFIER_CASE_SENSATIVE]: regex_match,
+  [MODIFIER_FUNCTION]: (matcher, pathname) => {
+    return matcher(pathname)
+  }
 }
 
 
@@ -37,6 +41,11 @@ class Location {
         location,
         modifier
       })
+    }
+
+    if (typeof location === 'function') {
+      modifier = MODIFIER_FUNCTION
+      return factory()
     }
 
     if (location_is) {
@@ -100,7 +109,8 @@ Location.MODIFIERS = {
   MODIFIER_CASE_SENSATIVE,
   MODIFIER_PREFIX,
   MODIFIER_EQUAL,
-  MODIFIER_PREFIX_LONGEST
+  MODIFIER_PREFIX_LONGEST,
+  MODIFIER_FUNCTION
 }
 
 

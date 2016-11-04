@@ -69,6 +69,12 @@ const router = new Router({
           return `.${p1}`
         })
       }
+    },
+
+    {
+      // Location could be a function
+      location: pathname => pathname === '/favicon.ico',
+      root: '/icon'
     }
   ],
 
