@@ -154,8 +154,40 @@ const cases = [
     p: '/a.png',
     'return': 200
   },
+  {
+    d: 'normal match prefix',
+    c: {
+      routes: [
+        {
+          location: '/',
+          root: fixture('src')
+        }
+      ]
+    },
+    p: '/a.js',
+    found: fixture('src', 'a.js')
+  },
+  {
+    d: 'match longest: ^~, prior to regex',
+    c: {
+      routes: [{
+        location: '/a',
+        returns: 200
+      }, {
+        location: /b/,
+        returns: 400
+      }, {
+        location: '/a/b',
+        longest: true,
+        returns: 300
+      }]
+    },
+    p: '/a/b/c',
+    'return': 300
+  }
 ]
 
+console.log(`${cases.length} test cases total.`)
 
 const EVENTS = [
   'found',

@@ -15,7 +15,7 @@ const {
   MODIFIER_CASE_SENSATIVE,
   MODIFIER_PREFIX,
   MODIFIER_EQUAL,
-  MODIFIER_MATCH_LONGEST,
+  MODIFIER_PREFIX_LONGEST,
   MODIFIER_FUNCTION
 } = Location.MODIFIERS
 
@@ -68,15 +68,26 @@ class Router {
         return
       }
 
+      // > using the “=” modifier it is possible to define an exact match of URI and location.
+      // > If an exact match is found, the search terminates.
       if (modifier === MODIFIER_EQUAL) {
+        return true
+      }
+
+
+      if (modifier === MODIFIER_FUNCTION) {
         return true
       }
 
       // RegExp
       if (
-        modifier === MODIFIER_CASE_SENSATIVE
-        || modifier === MODIFIER_CASE_INSENSATIVE
-        || !regex_match
+        (
+          modifier === MODIFIER_CASE_SENSATIVE
+          || modifier === MODIFIER_CASE_INSENSATIVE
+
+        // > The search of regular expressions terminates on the first match,
+        // >  and the corresponding configuration is used.
+        ) && !regex_match
       ) {
         regex_match = {
           index
@@ -114,11 +125,16 @@ class Router {
       return -1
     }
 
-    if (!prefix_match) {
-      return regex_match.index
+    // > If the longest matching prefix location has the “^~” modifier
+    // >  then regular expressions are not checked.
+    if (prefix_match.modifier === MODIFIER_PREFIX_LONGEST) {
+      return prefix_match.index
     }
 
-    if (prefix_match.modifier === MODIFIER_MATCH_LONGEST) {
+    // > If no match with a regular expression is found
+    // >  then the configuration of the prefix location
+    // >  remembered earlier is used.
+    if (!regex_match) {
       return prefix_match.index
     }
 

@@ -33,7 +33,7 @@ class Location {
   static from ({
     location,
     location_is,
-    modifier
+    longest
   }) {
 
     function factory () {
@@ -43,6 +43,8 @@ class Location {
       })
     }
 
+    let modifier
+
     if (typeof location === 'function') {
       modifier = MODIFIER_FUNCTION
       return factory()
@@ -50,7 +52,7 @@ class Location {
 
     if (location_is) {
       location = location_is
-      modifier = '='
+      modifier = MODIFIER_EQUAL
 
       return factory()
     }
@@ -63,8 +65,12 @@ class Location {
       return factory()
     }
 
+    if (longest) {
+      modifier = MODIFIER_PREFIX_LONGEST
+    }
+
     if (typeof location === 'string') {
-      modifier = ''
+      modifier = modifier || MODIFIER_PREFIX
 
       return factory()
     }
